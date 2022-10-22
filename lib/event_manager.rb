@@ -9,16 +9,16 @@ def clean_zipcodes(zipcode)
 end
 
 def clean_phone_numbers(phone_number)
-  phone_number = phone_number.delete("^0-9")
+  phone_number = phone_number.delete('^0-9')
 
   if phone_number.length < 10 ||
      phone_number.length > 11 ||
      phone_number.length == 11 && phone_number[0] != '1'
-    puts 'bad number'
+    'bad number'
   elsif phone_number.length == 11 && phone_number[0] == '1'
-    puts phone_number.delete_prefix('1')
+    phone_number.delete_prefix('1')
   else
-    puts phone_number
+    phone_number
   end
 end
 
@@ -47,6 +47,10 @@ def save_thank_you_letter(id, form_letter)
   end
 end
 
+def count_most_occuring(array)
+  array.max_by { |item| array.count(item) }
+end
+
 puts 'Event Manager Initialized!'
 
 contents = CSV.open(
@@ -58,6 +62,9 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
+reg_hour = []
+reg_day = []
+
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
@@ -65,9 +72,20 @@ contents.each do |row|
   phone_number = clean_phone_numbers(row[:homephone])
   # puts phone_number
 
+  # record registration hour
+  reg_time = Time.strptime(row[:regdate], '%m/%d/%Y %k:%M')
+  reg_hour << reg_time.hour
+
+  # record registration day
+  reg_date = Date.strptime(row[:regdate], '%m/%d/%y %k:%M')
+  reg_day << reg_date.strftime('%A')
+
   legislators = legislators_by_zipcode(zipcode)
 
   form_letter = erb_template.result(binding)
 
   save_thank_you_letter(id, form_letter)
 end
+
+p "The hour with the most registrations is #{count_most_occuring(reg_hour)}:00."
+p "The day with the most registrations is #{count_most_occuring(reg_day)}."
