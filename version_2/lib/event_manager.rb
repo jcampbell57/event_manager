@@ -70,7 +70,7 @@ contents.each do |row|
 
   form_letter = erb_template.result(binding)
 
-  # save_thank_you_letter(id, form_letter)
+  save_thank_you_letter(id, form_letter)
 end
 
 puts "The most popular registration hour was: #{(reg_times.max_by { |_k, v| v })[0]}:00"
